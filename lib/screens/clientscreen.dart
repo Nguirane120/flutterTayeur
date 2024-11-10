@@ -83,13 +83,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
       body: Column(
         // crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Expanded(child: ContainerWidget(clients: clients)),
-              // Expanded(child: ContainerWidget()),
-            ],
-          ),
+    
           ClientList(clients: clients),
         ],
       ),
