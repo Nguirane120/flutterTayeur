@@ -9,38 +9,66 @@ on:
     branches:
       - main
 
-
 jobs:  
   build:      
     name: Build & Release 
     runs-on: macos-latest 
 
     steps:
-        #1 Checkout Repository
+      #1 Checkout Repository
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-        #2 Setup Java
+      #2 Setup Java
       - name: Set Up Java
         uses: actions/setup-java@v3.12.0
         with:
           distribution: 'oracle'
           java-version: '17'
 
-        #3 Setup Flutter
+      #3 Setup Flutter
       - name: Set Up Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.22.2'
           channel: 'stable'
+      
+      # Configure Flutter
+      - name: Configure Flutter
+        run: |
+          flutter config --no-analytics
+          flutter config --no-cli-animations
 
-        #4 Install Dependencies
+      # Cache Dependencies
+      - name: Cache Flutter Pub Packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-flutter-
+
+      #4 Install Dependencies
       - name: Install Dependencies
         run: flutter pub get
 
+      #5 Build APK
       - name: Build APK
         run: flutter build apk --release
 
-        #7 Building App Bundle (aab)
+      #6 Build App Bundle (aab)
       - name: Build appBundle
         run: flutter build appbundle
+
+      #7 Upload Artifacts
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Upload App Bundle
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-aab
+          path: build/app/outputs/bundle/release/app-release.aab
